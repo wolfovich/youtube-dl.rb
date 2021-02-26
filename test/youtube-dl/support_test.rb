@@ -14,17 +14,13 @@ describe YoutubeDL::Support do
   end
 
   describe '#usable_executable_path' do
-    it 'should detect system executable' do
-      vendor_bin = File.join(Dir.pwd, 'vendor', 'bin', 'youtube-dl')
+    it 'should raise Errno::ENOENT if cannot find binary' do
       Dir.mktmpdir do |tmpdir|
-        FileUtils.cp vendor_bin, tmpdir
-
-        old_path = ENV["PATH"]
-        ENV["PATH"] = "#{tmpdir}:#{old_path}"
-
-        usable_path = @klass.usable_executable_path_for('youtube-dl')
-        assert_match usable_path, "#{tmpdir}/youtube-dl"
-
+        old_path    = ENV["PATH"]
+        ENV["PATH"] = tmpdir
+        assert_raises Errno::ENOENT do
+          @klass.usable_executable_path_for('youtube-dl')
+        end
         ENV["PATH"] = old_path
       end
     end
